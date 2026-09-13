@@ -319,7 +319,9 @@ h1{margin-bottom:0;font-size:36px;line-height:1.14}
     wrongBook: loadLS(LS_WRONG, []),
     wrongPractice: false,
     search: "",
-    autoNextTimer: null
+    autoNextTimer: null,
+    vocabLimit: 80,
+    vocabRendered: 0
   };
 
   function speak(text) {
@@ -447,27 +449,42 @@ h1{margin-bottom:0;font-size:36px;line-height:1.14}
     saveLS(LS_WRONG, state.wrongBook);
   }
 
+  var VOCAB_BATCH = 80;
+  var vocabFiltered = [];
+  function vocabItemHtml(w) {
+    return '<li>' +
+      '<button type="button" class="speak-btn small" data-word="' + w.word + '" aria-label="播放发音" title="播放发音">' + SPEAK_SVG + '</button>' +
+      '<span class="vw">' + w.word + '</span>' +
+      '<span class="vm">' + w.meaning + '</span>' +
+      '<span class="chip ' + w.difficulty + '">' + DIFF_LABEL[w.difficulty] + '</span>' +
+      '<a class="dict-link" href="' + dictUrl(w.word) + '" target="_blank" rel="noopener" aria-label="打开词典" title="查词典">' + DICT_SVG + '</a>' +
+      '</li>';
+  }
   function renderVocab() {
     var q = state.search.trim().toLowerCase();
-    var list = WORDS.filter(function (w) {
+    vocabFiltered = WORDS.filter(function (w) {
       if (state.difficulty !== "all" && w.difficulty !== state.difficulty) return false;
       if (q && w.word.toLowerCase().indexOf(q) === -1 && w.meaning.toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
-    elements.vocabCount.textContent = list.length + " 词";
-    if (list.length === 0) {
+    elements.vocabCount.textContent = vocabFiltered.length + " 词";
+    if (vocabFiltered.length === 0) {
       elements.vocabList.innerHTML = '<li class="empty-state">未找到匹配的单词。</li>';
+      state.vocabRendered = 0;
       return;
     }
-    elements.vocabList.innerHTML = list.map(function (w) {
-      return '<li>' +
-        '<button type="button" class="speak-btn small" data-word="' + w.word + '" aria-label="播放发音" title="播放发音">' + SPEAK_SVG + '</button>' +
-        '<span class="vw">' + w.word + '</span>' +
-        '<span class="vm">' + w.meaning + '</span>' +
-        '<span class="chip ' + w.difficulty + '">' + DIFF_LABEL[w.difficulty] + '</span>' +
-        '<a class="dict-link" href="' + dictUrl(w.word) + '" target="_blank" rel="noopener" aria-label="打开词典" title="查词典">' + DICT_SVG + '</a>' +
-        '</li>';
-    }).join("");
+    state.vocabLimit = VOCAB_BATCH;
+    var shown = vocabFiltered.slice(0, state.vocabLimit);
+    elements.vocabList.innerHTML = shown.map(vocabItemHtml).join("");
+    state.vocabRendered = shown.length;
+  }
+  function appendVocabBatch() {
+    if (state.tab !== "vocab") return;
+    if (state.vocabRendered >= vocabFiltered.length) return;
+    var more = vocabFiltered.slice(state.vocabRendered, state.vocabRendered + VOCAB_BATCH);
+    if (more.length === 0) return;
+    elements.vocabList.insertAdjacentHTML("beforeend", more.map(vocabItemHtml).join(""));
+    state.vocabRendered += more.length;
   }
 
   function clearAutoNextTimer() {
@@ -647,6 +664,17 @@ h1{margin-bottom:0;font-size:36px;line-height:1.14}
     state.search = elements.vocabSearch.value;
     renderVocab();
   });
+  var scrollTicking = false;
+  window.addEventListener("scroll", function () {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    window.requestAnimationFrame(function () {
+      scrollTicking = false;
+      if (state.tab !== "vocab") return;
+      var doc = document.documentElement;
+      if (doc.scrollTop + window.innerHeight >= doc.scrollHeight - 500) appendVocabBatch();
+    });
+  }, { passive: true });
 
   document.addEventListener("click", function (e) {
     var speakBtn = e.target.closest ? e.target.closest(".speak-btn") : null;
