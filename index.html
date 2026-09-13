@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>六级高频词汇选择器</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23007AFF'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='26' font-weight='700' text-anchor='middle' fill='%23FFFFFF'%3EC6%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f2f2f7;
+  --panel:rgba(255,255,255,.86);
+  --panel-solid:#fff;
+  --text:#1c1c1e;
+  --muted:#6e6e73;
+  --line:rgba(60,60,67,.14);
+  --primary:#007aff;
+  --primary-dark:#0062cc;
+  --success:#34c759;
+  --danger:#ff3b30;
+  --warn:#ff9500;
+  --success-bg:rgba(52,199,89,.13);
+  --danger-bg:rgba(255,59,48,.12);
+  --warn-bg:rgba(255,149,0,.14);
+  --shadow:0 22px 60px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:
+  radial-gradient(circle at 18% 10%, rgba(0,122,255,.13), transparent 28%),
+  radial-gradient(circle at 86% 8%, rgba(52,199,89,.12), transparent 26%),
+  var(--bg)}
+button{border:0;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed;opacity:.72}
+a{color:inherit}
+.app-shell{width:min(980px,calc(100% - 32px));margin:0 auto;padding:34px 0}
+.hero{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:end;margin-bottom:18px}
+.eyebrow{margin:0 0 8px;color:var(--primary);font-size:13px;font-weight:700}
+.control-panel{display:grid;gap:10px;margin-top:18px}
+.control-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.control-group span{min-width:34px;color:var(--muted);font-size:13px;font-weight:700}
+.control-button{min-height:34px;padding:0 13px;border:1px solid var(--line);border-radius:999px;color:var(--text);background:rgba(255,255,255,.72);font-size:14px;font-weight:700;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}
+.control-button:hover{border-color:rgba(0,122,255,.36);background:rgba(255,255,255,.94)}
+.control-button:active{transform:scale(.97)}
+.control-button.active{border-color:var(--primary);color:#fff;background:var(--primary)}
+h1,h2,p{margin-top:0}
+h1{margin-bottom:0;font-size:36px;line-height:1.14}
+.stats{display:grid;grid-template-columns:repeat(5,78px);gap:8px;padding:8px;border:1px solid rgba(255,255,255,.74);border-radius:22px;background:rgba(255,255,255,.55);box-shadow:0 10px 34px rgba(0,0,0,.05);backdrop-filter:blur(18px)}
+.stats div{min-height:74px;padding:12px 6px;border-radius:16px;background:rgba(255,255,255,.78);text-align:center}
+.stats span{display:block;margin-bottom:3px;font-size:26px;font-weight:760;line-height:1}
+.stats small{color:var(--muted);font-size:12px}
+.stats .acc{color:var(--primary)}
+.stats .streak{color:var(--warn)}
+.tabs{display:flex;gap:6px;margin-bottom:18px;padding:5px;width:max-content;border:1px solid rgba(255,255,255,.74);border-radius:999px;background:rgba(255,255,255,.55);backdrop-filter:blur(18px)}
+.tab-button{min-height:34px;padding:0 22px;border-radius:999px;color:var(--muted);background:transparent;font-size:14px;font-weight:700;transition:background .16s ease,color .16s ease}
+.tab-button:hover{color:var(--text)}
+.tab-button.active{color:#fff;background:var(--primary)}
+.practice-panel,.wrong-book,.vocab-panel{border:1px solid rgba(255,255,255,.78);border-radius:28px;background:var(--panel);box-shadow:var(--shadow);backdrop-filter:blur(22px)}
+.practice-panel{overflow:hidden}
+.question-card{padding:34px}
+.question-topline,.section-title{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:14px}
+.question-topline{align-items:center}
+#wordIndex,.pill{display:inline-flex;align-items:center;min-height:28px;padding:0 11px;border-radius:999px;background:rgba(118,118,128,.12)}
+#questionText{min-height:90px;margin:24px 0 22px;font-size:48px;font-weight:760;line-height:1.12;text-align:center;overflow-wrap:anywhere}
+.question-card.meaning-mode #questionText{font-size:34px;line-height:1.35}
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.choice-button{position:relative;min-height:72px;padding:16px 18px 16px 48px;border:1px solid rgba(60,60,67,.1);border-radius:18px;color:var(--text);background:var(--panel-solid);box-shadow:0 8px 22px rgba(0,0,0,.04);text-align:left;line-height:1.45;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+.opt-num{position:absolute;left:16px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(118,118,128,.12);color:var(--muted);font-size:12px;font-weight:700}
+.choice-button:hover{border-color:rgba(0,122,255,.42);background:rgba(255,255,255,.96);box-shadow:0 12px 28px rgba(0,122,255,.12);transform:translateY(-1px)}
+.choice-button:active{transform:scale(.985)}
+.choice-button.correct{border-color:rgba(52,199,89,.42);color:#16833a;background:var(--success-bg)}
+.choice-button.correct .opt-num{color:#16833a}
+.choice-button.wrong{border-color:rgba(255,59,48,.42);color:#c12a23;background:var(--danger-bg)}
+.feedback{min-height:28px;margin:18px 0 0;display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-weight:700}
+.feedback.correct{color:var(--success)}
+.feedback.wrong{color:var(--danger)}
+.feedback .fb-msg{display:inline-block}
+.speak-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;border:1px solid var(--line);border-radius:50%;color:var(--primary);background:rgba(255,255,255,.85);transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.speak-btn:hover{border-color:rgba(0,122,255,.4);background:#fff;transform:scale(1.06)}
+.speak-btn:active{transform:scale(.94)}
+.speak-btn svg{width:17px;height:17px}
+.speak-btn.small{width:26px;height:26px}
+.speak-btn.small svg{width:14px;height:14px}
+.dict-link{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:none;border-radius:50%;color:var(--muted);background:rgba(118,118,128,.1);text-decoration:none;transition:background .16s ease,color .16s ease}
+.dict-link:hover{color:var(--primary);background:rgba(0,122,255,.12)}
+.dict-link svg{width:13px;height:13px}
+.actions{display:flex;justify-content:center;gap:12px;margin-top:24px}
+.actions button{min-width:116px;min-height:46px;padding:0 18px;border-radius:999px;color:#fff;background:var(--primary);box-shadow:0 10px 22px rgba(0,122,255,.22);font-weight:700;transition:transform .16s ease,background .16s ease,box-shadow .16s ease}
+.actions button:hover{background:var(--primary-dark);box-shadow:0 12px 26px rgba(0,122,255,.26)}
+.actions button:active{transform:scale(.97)}
+.actions .secondary{border:1px solid var(--line);color:var(--primary);background:rgba(255,255,255,.76);box-shadow:none}
+.actions .secondary:hover{background:rgba(255,255,255,.95);box-shadow:none}
+.wrong-practice-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:12px 16px;border:1px solid rgba(255,149,0,.4);border-radius:16px;color:#9a5b00;background:var(--warn-bg);font-size:14px;font-weight:700}
+.wrong-practice-banner button{flex:none;min-height:32px;padding:0 14px;border-radius:999px;color:#9a5b00;border:1px solid rgba(255,149,0,.45);background:rgba(255,255,255,.7);font-weight:700}
+.wrong-practice-banner button:hover{background:#fff}
+.wrong-book{margin-top:18px;padding:24px}
+.section-title{align-items:center;margin-bottom:14px}
+.section-title h2{margin:0;font-size:21px}
+.section-title .pill{color:var(--muted)}
+.wrong-book-actions{display:flex;align-items:center;gap:8px}
+.wrong-book-actions button{min-height:30px;padding:0 12px;border:1px solid var(--line);border-radius:999px;color:var(--primary);background:rgba(255,255,255,.8);font-size:13px;font-weight:700;transition:background .16s ease,border-color .16s ease}
+.wrong-book-actions button:hover{border-color:rgba(0,122,255,.4);background:#fff}
+.wrong-book-actions button.active{color:#fff;background:var(--primary);border-color:var(--primary)}
+#wrongBookList{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+#wrongBookList li{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.72);line-height:1.5}
+#wrongBookList strong{color:var(--primary)}
+#wrongBookList .wm{flex:1;min-width:0;color:var(--text);overflow-wrap:anywhere}
+.chip{flex:none;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.chip.easy{color:#16833a;background:var(--success-bg)}
+.chip.medium{color:#9a5b00;background:var(--warn-bg)}
+.chip.hard{color:#c12a23;background:var(--danger-bg)}
+.remove-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:none;border-radius:50%;color:var(--muted);background:rgba(118,118,128,.1);transition:background .16s ease,color .16s ease}
+.remove-btn:hover{color:var(--danger);background:var(--danger-bg)}
+.remove-btn svg{width:13px;height:13px}
+.empty-state{color:var(--muted)}
+.hidden{display:none!important}
+.vocab-panel{padding:24px}
+.vocab-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.search-box{display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:0 14px;height:40px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.8)}
+.search-box svg{width:16px;height:16px;flex:none;color:var(--muted)}
+.search-box input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:var(--text)}
+.search-box input::placeholder{color:var(--muted)}
+.vocab-count{flex:none;color:var(--muted);font-size:13px;font-weight:700}
+.vocab-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.vocab-list li{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.7);line-height:1.5}
+.vocab-list .vw{min-width:120px;font-size:16px;font-weight:760}
+.vocab-list .vm{flex:1;min-width:0;overflow-wrap:anywhere}
+.shortcut-hint{margin:16px 0 0;color:var(--muted);font-size:12px;text-align:center}
+.toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,16px);padding:10px 18px;border-radius:999px;color:#fff;background:rgba(28,28,30,.88);font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:50}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:760px){
+  .app-shell{width:min(100% - 22px,980px);padding:20px 0}
+  .hero{grid-template-columns:1fr;align-items:start}
+  h1{font-size:30px}
+  .control-panel{margin-top:16px}
+  .stats{width:100%;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:6px}
+  .stats div{min-height:64px;padding:10px 2px}
+  .stats span{font-size:21px}
+  .stats small{font-size:11px}
+  .tabs{width:100%}
+  .tab-button{flex:1;padding:0 10px}
+  .question-card{padding:24px 18px 22px}
+  #questionText{min-height:72px;margin:20px 0 18px;font-size:38px}
+  .question-card.meaning-mode #questionText{font-size:28px}
+  .choice-grid{grid-template-columns:1fr;gap:10px}
+  .choice-button{min-height:62px}
+  .actions{flex-direction:column}
+  .actions button{width:100%}
+  .wrong-book{padding:20px}
+  .section-title{flex-wrap:wrap}
+  .wrong-book-actions{width:100%}
+  .vocab-panel{padding:20px}
+  .vocab-toolbar{flex-wrap:wrap}
+  .vocab-count{width:100%;text-align:right}
+  .vocab-list .vw{min-width:0;width:38%}
+}
+</style>
+</head>
+<body>
+<main class="app-shell">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">CET-6 Word Trainer</p>
+      <h1>六级高频词汇选择器</h1>
+      <div class="control-panel" aria-label="练习设置">
+        <div class="control-group" aria-label="模式切换">
+          <span>模式</span>
+          <button class="control-button active" type="button" data-mode="en-to-zh">英文选中文</button>
+          <button class="control-button" type="button" data-mode="zh-to-en">中文选英文</button>
+        </div>
+        <div class="control-group" aria-label="难度筛选">
+          <span>难度</span>
+          <button class="control-button active" type="button" data-difficulty="all">全部</button>
+          <button class="control-button" type="button" data-difficulty="easy">基础</button>
+          <button class="control-button" type="button" data-difficulty="medium">进阶</button>
+          <button class="control-button" type="button" data-difficulty="hard">困难</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" aria-label="答题统计">
+      <div><span id="totalCount">0</span><small>总题数</small></div>
+      <div><span id="correctCount">0</span><small>正确</small></div>
+      <div><span id="wrongCount">0</span><small>错误</small></div>
+      <div><span id="accuracyRate" class="acc">—</span><small>正确率</small></div>
+      <div><span id="streakCount" class="streak">0</span><small>连对</small></div>
+    </div>
+  </section>
+
+  <nav class="tabs" aria-label="功能切换">
+    <button class="tab-button active" type="button" data-tab="practice">练习</button>
+    <button class="tab-button" type="button" data-tab="vocab">词汇表</button>
+  </nav>
+
+  <section id="practiceView" aria-label="练习区">
+    <section class="practice-panel">
+      <div class="question-card">
+        <div id="wrongPracticeBanner" class="wrong-practice-banner hidden">
+          <span>错题重练中 · 答对自动移出错题本</span>
+          <button id="exitWrongPractice" type="button">退出</button>
+        </div>
+        <div class="question-topline">
+          <span id="wordIndex">第 1 题</span>
+          <button id="speakQuestion" class="speak-btn" type="button" aria-label="播放发音" title="播放发音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+        </div>
+        <h2 id="questionText">正在加载题目...</h2>
+        <div id="choiceArea" class="choice-grid" aria-label="答案选项"></div>
+        <p id="feedback" class="feedback" aria-live="polite"></p>
+        <div class="actions">
+          <button id="nextQuestion" type="button">下一题</button>
+          <button id="resetPractice" class="secondary" type="button">重新开始</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrong-book" aria-label="错题本">
+      <div class="section-title">
+        <h2>错题本</h2>
+        <div class="wrong-book-actions">
+          <button id="practiceWrongBtn" type="button">重练错题</button>
+          <button id="clearWrongBtn" type="button">清空</button>
+          <span id="wrongBookCount" class="pill">0 个</span>
+        </div>
+      </div>
+      <ul id="wrongBookList"><li class="empty-state">答错的词会自动记录在这里。</li></ul>
+    </section>
+  </section>
+
+  <section id="vocabView" class="vocab-panel hidden" aria-label="词汇表">
+    <div class="vocab-toolbar">
+      <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="vocabSearch" type="search" placeholder="搜索单词或释义…" aria-label="搜索词汇"></div>
+      <span id="vocabCount" class="vocab-count">0 词</span>
+    </div>
+    <ul id="vocabList" class="vocab-list"></ul>
+  </section>
+
+  <p class="shortcut-hint">快捷键：1–4 选答案 · Enter 下一题 · R 重新开始</p>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+(function () {
+  "use strict";
+
+  /* ===== 数据：784 个六级高频词 [word, meaning, difficulty] ===== */
+  var RAW_WORDS = [["abide","遵守；忍受","easy"],["abolish","废除；取消","easy"],["abrupt","突然的；唐突的","easy"],["absurd","荒谬的；不合理的","easy"],["abundant","丰富的；充足的","easy"],["accelerate","加速；促进","easy"],["accessible","可接近的；易理解的","easy"],["accommodate","容纳；适应；提供住宿","medium"],["accomplish","完成；实现","easy"],["accumulate","积累；积聚","easy"],["acknowledge","承认；感谢；告知收到","easy"],["acquaint","使熟悉；使了解","easy"],["acquire","获得；习得","easy"],["acute","严重的；敏锐的","easy"],["adequate","足够的；适当的","easy"],["adhere","坚持；遵守；粘附","easy"],["adjacent","邻近的；毗连的","easy"],["adjust","调整；适应","easy"],["administer","管理；实施","easy"],["advocate","提倡；拥护者","easy"],["affection","喜爱；感情","easy"],["agenda","议程；待办事项","easy"],["aggravate","加重；使恶化","easy"],["aggregate","总数；合计的","easy"],["allocate","分配；拨出","easy"],["alter","改变；修改","easy"],["alternative","可替代的；选择","easy"],["ambiguous","模棱两可的；含糊的","easy"],["amend","修正；修改","easy"],["analogy","类比；相似","easy"],["anticipate","预期；期待","easy"],["apparatus","设备；仪器","medium"],["apparent","明显的；表面上的","easy"],["appetite","食欲；强烈欲望","easy"],["appliance","器具；家用电器","easy"],["applicable","适用的；可应用的","easy"],["appraise","评价；估价","easy"],["arbitrary","任意的；武断的","medium"],["assault","攻击；袭击","easy"],["assemble","集合；装配","easy"],["assert","断言；坚持认为","easy"],["asset","资产；有价值的人或物","easy"],["assign","分配；指定","easy"],["assimilate","吸收；同化","hard"],["attribute","属性；把...归因于","easy"],["authentic","真实的；可信的","medium"],["authorize","授权；批准","easy"],["autonomous","自治的；自主的","easy"],["barren","贫瘠的；无结果的","easy"],["bias","偏见；使有偏见","easy"],["browse","浏览；随意翻阅","easy"],["bulk","大部分；体积","easy"],["bureaucracy","官僚制度；官僚作风","hard"],["campaign","运动；战役","easy"],["capacity","能力；容量","easy"],["casualty","伤亡人员；受害者","easy"],["catastrophe","灾难；大祸","hard"],["cater","迎合；提供饮食服务","easy"],["circulate","循环；传播","easy"],["coherent","连贯的；一致的","medium"],["coincide","同时发生；一致","easy"],["collaborate","合作；协作","easy"],["collapse","倒塌；崩溃","easy"],["commence","开始；着手","easy"],["commodity","商品；日用品","easy"],["compatible","兼容的；相容的","medium"],["compel","强迫；迫使","medium"],["compensate","补偿；弥补","medium"],["compile","编纂；汇编","medium"],["complement","补充；补足物","medium"],["comply","遵从；服从","medium"],["component","组成部分；部件","medium"],["comprehensive","全面的；综合的","medium"],["concede","承认；让步","hard"],["conceive","构想；怀孕","medium"],["condense","压缩；凝结","hard"],["confer","商议；授予","medium"],["confine","限制；局限于","medium"],["conform","遵守；符合","medium"],["confront","面对；对抗","medium"],["consecutive","连续的；连贯的","medium"],["consensus","共识；一致意见","medium"],["conserve","保护；节约","medium"],["console","安慰；控制台","medium"],["consolidate","巩固；合并","medium"],["constrain","限制；约束","medium"],["consult","咨询；查阅","medium"],["contaminate","污染；弄脏","medium"],["contemplate","沉思；考虑","hard"],["contradict","反驳；与...矛盾","medium"],["controversy","争议；论战","hard"],["convene","召开；集合","medium"],["coordinate","协调；坐标","medium"],["correlate","相关；使相互关联","hard"],["correspond","符合；通信","medium"],["corrupt","腐败的；使腐化","medium"],["credible","可信的；可靠的","medium"],["crucial","关键的；至关重要的","medium"],["cultivate","培养；耕种","medium"],["decent","体面的；得体的","medium"],["decline","下降；拒绝","medium"],["dedicate","献身；把...用于","medium"],["deduce","推断；演绎","medium"],["defect","缺陷；背叛","medium"],["deficiency","缺乏；不足","hard"],["delegate","代表；委派","medium"],["deliberate","故意的；仔细考虑","hard"],["denote","表示；指示","hard"],["derive","获得；起源于","medium"],["descend","下降；传下来","medium"],["designate","指定；标明","medium"],["desperate","绝望的；极需要的","medium"],["detect","发现；察觉","medium"],["deteriorate","恶化；退化","hard"],["deviate","偏离；背离","hard"],["diagnose","诊断；判断","medium"],["differentiate","区分；使不同","medium"],["dilemma","困境；两难","medium"],["diminish","减少；削弱","medium"],["dimension","维度；方面；尺寸","medium"],["discriminate","歧视；区分","hard"],["disguise","伪装；掩饰","hard"],["displace","取代；迫使离开","hard"],["dispose","处理；布置","medium"],["disrupt","扰乱；中断","medium"],["distort","歪曲；扭曲","hard"],["diverse","多种多样的；不同的","medium"],["divert","转移；使改道","medium"],["document","文件；记录","medium"],["dominant","占支配地位的；主要的","medium"],["drastic","激烈的；严厉的","medium"],["durable","耐用的；持久的","medium"],["elaborate","详尽的；精心制作的","medium"],["eligible","有资格的；合格的","medium"],["eliminate","消除；淘汰","medium"],["embrace","拥抱；欣然接受","medium"],["emerge","出现；浮现","medium"],["empirical","经验主义的；实证的","medium"],["endeavor","努力；尽力","medium"],["enforce","执行；强制实施","medium"],["enhance","提高；增强","medium"],["enlighten","启发；开导","medium"],["enroll","登记；入学","medium"],["enterprise","企业；事业心","medium"],["entitle","使有权利；给...命名","medium"],["equivalent","相等的；等价物","medium"],["erode","侵蚀；削弱","hard"],["essence","本质；精髓","medium"],["esteem","尊重；评价","hard"],["evacuate","撤离；疏散","medium"],["evaluate","评估；评价","medium"],["exceed","超过；胜过","medium"],["exclude","排除；不包括","medium"],["execute","执行；处决","medium"],["exert","施加；运用","hard"],["exhaust","耗尽；使筋疲力尽","medium"],["explicit","明确的；清楚的","medium"],["exploit","利用；开发；剥削","hard"],["extract","提取；摘录","medium"],["facilitate","促进；使便利","medium"],["feasible","可行的；可做到的","medium"],["fluctuate","波动；起伏","hard"],["formidable","强大的；令人敬畏的","hard"],["formulate","制定；表达","medium"],["fragile","脆弱的；易碎的","medium"],["friction","摩擦；冲突","medium"],["fulfill","履行；实现","medium"],["fundamental","根本的；基础的","medium"],["generate","产生；生成","medium"],["genuine","真正的；真诚的","medium"],["grant","授予；补助金","medium"],["gravity","重力；严重性","medium"],["guarantee","保证；担保","medium"],["hinder","阻碍；妨碍","medium"],["identical","相同的；一致的","medium"],["illusion","错觉；幻想","medium"],["implement","实施；工具","medium"],["implicit","含蓄的；暗示的","medium"],["impose","强加；征收","medium"],["incentive","激励；刺激","medium"],["incline","倾向；斜坡","medium"],["incorporate","包含；合并","medium"],["indispensable","不可或缺的；必需的","medium"],["induce","引起；诱导","medium"],["inevitable","不可避免的","medium"],["infer","推断；推论","medium"],["infrastructure","基础设施","medium"],["ingredient","成分；要素","medium"],["inherent","固有的；内在的","medium"],["initiate","开始；发起","medium"],["innovate","创新；革新","medium"],["insight","洞察力；见解","medium"],["inspect","检查；视察","medium"],["institute","机构；建立","medium"],["integral","必需的；完整的","medium"],["integrate","整合；融合","medium"],["integrity","正直；完整","medium"],["intensify","加强；加剧","medium"],["intervene","干预；介入","medium"],["intricate","复杂精细的；错综的","hard"],["justify","证明有理；为...辩护","easy"],["journal","期刊；日志","easy"],["justice","公正；司法","easy"],["keen","敏锐的；热衷的","easy"],["label","标签；把...称为","easy"],["laboratory","实验室","easy"],["lag","落后；滞后","medium"],["landscape","风景；局面","easy"],["launch","发起；发射","easy"],["layer","层；阶层","easy"],["layout","布局；设计","easy"],["legacy","遗产；遗留问题","medium"],["legislation","立法；法律","medium"],["legitimate","合法的；合理的","medium"],["liable","有责任的；易于...的","medium"],["liberal","开明的；自由主义的","medium"],["license","许可证；许可","easy"],["likewise","同样地；也","easy"],["limitation","限制；局限","easy"],["linear","线性的；直线的","medium"],["literacy","读写能力；素养","medium"],["literal","字面的；确切的","medium"],["loyal","忠诚的","easy"],["magnificent","壮丽的；宏伟的","medium"],["maintain","维持；主张","easy"],["maintenance","维护；保养","medium"],["manifest","显示；明显的","hard"],["manual","手册；手工的","easy"],["margin","边缘；利润","easy"],["marine","海洋的；海事的","medium"],["massive","巨大的；大量的","easy"],["mature","成熟的；使成熟","easy"],["maximize","使最大化","medium"],["mechanism","机制；机械装置","medium"],["mediate","调解；斡旋","hard"],["medium","媒介；中等的","easy"],["migrate","迁移；移居","medium"],["military","军事的；军队","easy"],["minimal","最小的；最低限度的","medium"],["minimize","使最小化","medium"],["minority","少数；少数民族","easy"],["mislead","误导","medium"],["mission","任务；使命","easy"],["moderate","适度的；缓和","easy"],["modify","修改；调整","easy"],["monitor","监测；监视器","easy"],["motive","动机；目的","medium"],["mutual","相互的；共同的","easy"],["naive","天真的；幼稚的","medium"],["narrative","叙述；故事","medium"],["negative","消极的；否定的","easy"],["neglect","忽视；疏忽","easy"],["negotiate","谈判；协商","medium"],["neutral","中立的；中性的","easy"],["nevertheless","然而；不过","medium"],["norm","规范；常态","medium"],["notable","显著的；值得注意的","easy"],["notion","概念；看法","easy"],["nuclear","核的；核心的","medium"],["objective","目标；客观的","easy"],["obligation","义务；责任","medium"],["obscure","模糊的；使不清楚","hard"],["observe","观察；遵守","easy"],["obstacle","障碍；阻碍","easy"],["obtain","获得；得到","easy"],["occupation","职业；占领","easy"],["occupy","占据；占用","easy"],["occur","发生；出现","easy"],["odd","奇怪的；奇数的","easy"],["offensive","冒犯的；进攻","medium"],["ongoing","持续的；进行中的","easy"],["operate","运转；操作","easy"],["opponent","对手；反对者","easy"],["opportunity","机会；时机","easy"],["oppress","压迫；压制","hard"],["option","选择；选项","easy"],["orient","使适应；确定方向","medium"],["outcome","结果；成果","easy"],["outline","概述；轮廓","easy"],["overlap","重叠；交叠","medium"],["overlook","忽视；俯瞰","easy"],["overwhelm","压倒；使不知所措","medium"],["paradox","悖论；矛盾现象","hard"],["parallel","平行的；相似的","medium"],["parameter","参数；界限","hard"],["participate","参加；参与","easy"],["passive","被动的；消极的","easy"],["peculiar","奇特的；特有的","medium"],["perceive","察觉；理解","medium"],["perception","感知；看法","medium"],["periodic","周期的；定期的","medium"],["permanent","永久的；固定的","easy"],["persist","坚持；持续","medium"],["perspective","视角；观点","medium"],["persuade","说服；劝服","easy"],["phase","阶段；时期","easy"],["phenomenon","现象","medium"],["philosophy","哲学；理念","medium"],["physical","身体的；物质的","easy"],["plot","情节；密谋","easy"],["policy","政策；方针","easy"],["potential","潜在的；潜力","easy"],["practical","实际的；实用的","easy"],["precise","精确的；准确的","easy"],["predict","预测；预言","easy"],["preliminary","初步的；预备的","medium"],["preserve","保护；保存","easy"],["prestige","声望；威望","hard"],["previous","以前的；先前的","easy"],["primary","主要的；初级的","easy"],["primitive","原始的；简单的","medium"],["priority","优先事项；优先权","medium"],["proceed","继续进行；前进","easy"],["process","过程；处理","easy"],["professional","专业的；职业的","easy"],["prohibit","禁止；阻止","medium"],["prominent","突出的；杰出的","medium"],["promote","促进；提升","easy"],["prompt","促使；迅速的","easy"],["proof","证据；证明","easy"],["proper","适当的；恰当的","easy"],["proportion","比例；部分","medium"],["prospect","前景；可能性","medium"],["prosperity","繁荣；兴旺","medium"],["protein","蛋白质","medium"],["province","省；领域","easy"],["provision","供应；条款","medium"],["psychology","心理学；心理","medium"],["publication","出版物；发表","easy"],["purchase","购买；采购","easy"],["pursue","追求；从事","easy"],["qualify","使合格；取得资格","medium"],["quantitative","定量的；数量的","hard"],["radical","激进的；根本的","medium"],["random","随机的；任意的","easy"],["range","范围；排列","easy"],["ratio","比率；比例","medium"],["rational","理性的；合理的","medium"],["react","反应；回应","easy"],["recover","恢复；重新获得","easy"],["recruit","招募；新成员","medium"],["refine","改进；提炼","medium"],["reflect","反映；思考","easy"],["reform","改革；改良","easy"],["refrain","克制；避免","hard"],["regime","政权；制度","hard"],["region","地区；区域","easy"],["register","登记；注册","easy"],["regulate","管理；调节","medium"],["reinforce","加强；巩固","medium"],["reject","拒绝；排斥","easy"],["relate","联系；叙述","easy"],["release","释放；发布","easy"],["relevant","相关的；切题的","easy"],["relief","减轻；救济","easy"],["rely","依靠；信赖","easy"],["remarkable","显著的；非凡的","medium"],["remedy","补救；疗法","medium"],["remote","遥远的；远程的","easy"],["render","使成为；提供","hard"],["renew","更新；恢复","easy"],["renovate","翻新；修复","medium"],["reproduce","复制；繁殖","medium"],["reputation","名誉；声望","easy"],["require","需要；要求","easy"],["resemble","像；类似于","medium"],["reserve","保留；储备","easy"],["reside","居住；存在于","medium"],["resign","辞职；放弃","medium"],["resolve","解决；决心","easy"],["resource","资源；财力","easy"],["restore","恢复；修复","easy"],["restrain","抑制；约束","medium"],["restrict","限制；约束","easy"],["resume","恢复；简历","easy"],["retain","保留；保持","medium"],["reveal","揭示；显示","easy"],["reverse","相反；颠倒","medium"],["revise","修改；复习","easy"],["revolution","革命；巨大变革","easy"],["rigid","严格的；僵硬的","medium"],["route","路线；途径","easy"],["routine","常规；例行的","easy"],["rural","农村的；乡村的","easy"],["sacrifice","牺牲；献出","easy"],["sanction","制裁；批准","hard"],["scenario","情景；设想","medium"],["schedule","时间表；安排","easy"],["scheme","计划；方案","medium"],["scope","范围；眼界","medium"],["sector","部门；领域","easy"],["secure","安全的；获得","easy"],["segment","部分；片段","medium"],["selective","选择性的","medium"],["sequence","顺序；连续","medium"],["shift","转移；轮班","easy"],["significant","重要的；显著的","easy"],["simulate","模拟；模仿","medium"],["simultaneous","同时发生的","medium"],["skeptical","怀疑的","hard"],["so-called","所谓的","easy"],["sole","唯一的；单独的","medium"],["somewhat","有点；稍微","easy"],["sophisticated","复杂的；老练的","hard"],["source","来源；出处","easy"],["specific","具体的；特定的","easy"],["specify","明确说明；指定","medium"],["sphere","领域；球体","medium"],["spontaneous","自发的；自然的","hard"],["stability","稳定；稳定性","medium"],["stable","稳定的；稳固的","easy"],["standard","标准；规范","easy"],["statistics","统计；统计学","medium"],["status","地位；状态","easy"],["stimulate","刺激；激励","medium"],["strategy","策略；战略","easy"],["stress","压力；强调","easy"],["structure","结构；构造","easy"],["submit","提交；屈服","easy"],["subsequent","随后的；后来的","medium"],["subsidy","补贴；津贴","hard"],["substitute","替代；代替品","medium"],["subtle","微妙的；不易察觉的","hard"],["sufficient","足够的；充分的","easy"],["summary","摘要；总结","easy"],["superior","更好的；上级的","medium"],["supplement","补充；增补","medium"],["suppress","压制；镇压","medium"],["surplus","剩余；过剩","hard"],["survey","调查；测量","easy"],["suspend","暂停；悬挂","medium"],["sustain","维持；支撑","medium"],["symbol","象征；符号","easy"],["symptom","症状；征兆","medium"],["synthetic","合成的；人造的","hard"],["tackle","处理；应对","medium"],["temporary","临时的；暂时的","easy"],["tendency","倾向；趋势","easy"],["terminal","终点；终端的","medium"],["territory","领土；领域","medium"],["theoretical","理论的","medium"],["therapy","治疗；疗法","medium"],["thereby","因此；由此","medium"],["threshold","门槛；阈值","hard"],["tolerance","宽容；忍耐力","medium"],["topic","话题；主题","easy"],["trace","痕迹；追踪","easy"],["tradition","传统；惯例","easy"],["transfer","转移；调动","easy"],["transform","转变；改造","easy"],["transmit","传送；传播","medium"],["trend","趋势；倾向","easy"],["trigger","触发；引发","medium"],["ultimate","最终的；根本的","medium"],["undergo","经历；经受","medium"],["underlie","构成...的基础","hard"],["undertake","承担；从事","medium"],["unify","统一；联合","medium"],["unique","独特的；唯一的","easy"],["urban","城市的；都市的","easy"],["urgent","紧急的；迫切的","easy"],["utilize","利用；使用","medium"],["valid","有效的；合理的","easy"],["variable","变量；可变的","medium"],["variation","变化；变体","medium"],["vehicle","车辆；媒介","easy"],["version","版本；说法","easy"],["violate","违反；侵犯","medium"],["virtual","虚拟的；实际上的","medium"],["visible","可见的；明显的","easy"],["vision","视力；远见","easy"],["vital","至关重要的；有活力的","easy"],["voluntary","自愿的；志愿的","medium"],["welfare","福利；幸福","easy"],["whereas","然而；鉴于","medium"],["widespread","广泛的；普遍的","easy"],["withdraw","撤回；取出","medium"],["witness","目击者；见证","easy"],["yield","产生；屈服","medium"],["abnormal","异常的；不正常的","medium"],["absorb","吸收；理解","easy"],["abstract","抽象的；摘要","medium"],["abuse","滥用；虐待","medium"],["academic","学术的；学院的","easy"],["access","接近；使用权","easy"],["accidental","偶然的；意外的","easy"],["accord","一致；协议","medium"],["accurate","准确的；精确的","easy"],["adapt","适应；改编","easy"],["addition","增加；加法","easy"],["adequacy","充足；适当","hard"],["administration","管理；行政部门","easy"],["admission","承认；准入","medium"],["adolescent","青少年的；青少年","medium"],["adverse","不利的；有害的","hard"],["affair","事务；事件","easy"],["affirm","肯定；确认","medium"],["afford","负担得起；提供","easy"],["aid","援助；帮助","easy"],["alarm","警报；使惊恐","easy"],["alien","外国的；陌生的","medium"],["alliance","联盟；同盟","medium"],["allowance","津贴；限额","medium"],["amateur","业余的；业余爱好者","medium"],["amaze","使惊奇","easy"],["ambition","抱负；雄心","easy"],["ample","充足的；宽敞的","medium"],["analysis","分析；解析","easy"],["annual","每年的；年度的","easy"],["anxiety","焦虑；担忧","easy"],["appeal","呼吁；吸引力","easy"],["approach","方法；接近","easy"],["approval","批准；认可","easy"],["approximate","大约的；近似的","medium"],["architecture","建筑；体系结构","medium"],["argument","争论；论点","easy"],["arise","出现；产生","easy"],["arrange","安排；整理","easy"],["artificial","人工的；虚假的","medium"],["aspect","方面；外观","easy"],["assess","评估；估算","easy"],["assistance","帮助；援助","easy"],["associate","联想；联系","easy"],["assume","假定；承担","easy"],["assumption","假设；承担","medium"],["assure","保证；使确信","easy"],["atmosphere","气氛；大气","easy"],["attain","达到；获得","medium"],["attitude","态度；看法","easy"],["authority","权威；当局","easy"],["automatic","自动的","easy"],["available","可获得的；有空的","easy"],["aware","意识到的","easy"],["awkward","尴尬的；笨拙的","medium"],["barrier","障碍；屏障","easy"],["beneficial","有益的；有利的","medium"],["benefit","利益；受益","easy"],["biological","生物的","medium"],["boundary","边界；界限","medium"],["brief","简短的；摘要","easy"],["capable","有能力的","easy"],["category","类别；种类","easy"],["cease","停止；终止","medium"],["challenge","挑战；质疑","easy"],["characteristic","特征；特有的","easy"],["chemical","化学的；化学品","easy"],["circumstance","情况；环境","easy"],["civil","公民的；文明的","easy"],["clarify","澄清；阐明","medium"],["classic","经典的；典型的","easy"],["classify","分类；归类","medium"],["clue","线索；提示","easy"],["code","代码；编码","easy"],["cognitive","认知的","medium"],["collective","集体的；共同的","medium"],["commission","委员会；委托","medium"],["commitment","承诺；投入","medium"],["communication","交流；通信","easy"],["community","社区；共同体","easy"],["comparison","比较；对照","easy"],["competitive","竞争的；有竞争力的","medium"],["complex","复杂的；综合体","easy"],["compound","化合物；复合的","medium"],["comprise","包括；由...组成","medium"],["concentrate","集中；浓缩","easy"],["concept","概念；观念","easy"],["concern","关心；担忧","easy"],["conclude","推断；结束","easy"],["conduct","实施；行为","easy"],["confidence","信心；信任","easy"],["conflict","冲突；矛盾","easy"],["consequence","后果；结果","medium"],["consistent","一致的；持续的","medium"],["constant","持续的；常量","easy"],["construct","建造；构想","easy"],["consume","消耗；消费","easy"],["contact","联系；接触","easy"],["context","背景；语境","easy"],["contract","合同；收缩","easy"],["contrast","对比；差异","easy"],["contribution","贡献；捐助","easy"],["convince","使确信；说服","easy"],["cooperate","合作；协作","easy"],["core","核心；果核","easy"],["corporate","公司的；团体的","medium"],["criterion","标准；准则","hard"],["crisis","危机；紧要关头","easy"],["critical","关键的；批判的","easy"],["currency","货币；通用","medium"],["cycle","周期；循环","easy"],["data","数据；资料","easy"],["debate","辩论；争论","easy"],["decade","十年","easy"],["decision","决定；决策","easy"],["define","定义；界定","easy"],["demonstrate","证明；展示","medium"],["departure","离开；出发","medium"],["depress","使沮丧；压低","medium"],["despite","尽管；不管","easy"],["detail","细节；详述","easy"],["device","设备；装置","easy"],["dialogue","对话；对白","easy"],["diet","饮食；节食","easy"],["disaster","灾难；灾祸","easy"],["discipline","纪律；学科","medium"],["discovery","发现；被发现的事物","easy"],["dismiss","解散；驳回","medium"],["display","展示；显示","easy"],["distance","距离；差距","easy"],["distinct","明显不同的；清楚的","medium"],["distribute","分发；分配","medium"],["domestic","国内的；家庭的","easy"],["draft","草稿；起草","easy"],["dynamic","动态的；有活力的","medium"],["economy","经济；节约","easy"],["efficient","高效的；有效率的","easy"],["element","元素；要素","easy"],["emphasis","强调；重点","easy"],["emotion","情感；情绪","easy"],["encounter","遭遇；遇到","medium"],["ensure","确保；保证","easy"],["environment","环境；周围状况","easy"],["equipment","设备；装备","easy"],["establish","建立；确立","easy"],["estimate","估计；估算","easy"],["eventually","最终；终于","easy"],["evidence","证据；迹象","easy"],["evolution","演变；进化","medium"],["exception","例外；异议","medium"],["exhibit","展览；显示","medium"],["expand","扩大；扩展","easy"],["expense","费用；代价","easy"],["experiment","实验；试验","easy"],["expert","专家；熟练的","easy"],["export","出口；输出","easy"],["exposure","暴露；接触","medium"],["external","外部的；外来的","medium"],["factor","因素；系数","easy"],["feature","特征；特色","easy"],["finance","金融；资金","easy"],["flexible","灵活的；柔韧的","easy"],["focus","焦点；集中","easy"],["foundation","基础；基金会","easy"],["framework","框架；体系","medium"],["function","功能；起作用","easy"],["global","全球的；整体的","easy"],["goal","目标；目的","easy"],["grade","等级；成绩","easy"],["highlight","突出；强调","easy"],["hypothesis","假设；假说","hard"],["identity","身份；特性","easy"],["ignorance","无知；不了解","medium"],["impact","影响；冲击","easy"],["import","进口；输入","easy"],["initial","最初的；首字母","easy"],["input","输入；投入","easy"],["instance","例子；情况","easy"],["interaction","互动；相互作用","medium"],["internal","内部的；内在的","easy"],["interpret","解释；理解","medium"],["investigate","调查；研究","medium"],["involve","包含；涉及","easy"],["isolate","隔离；使孤立","medium"],["issue","问题；发行","easy"],["item","项目；条款","easy"],["legal","法律的；合法的","easy"],["logic","逻辑；道理","easy"],["major","主要的；专业","easy"],["method","方法；办法","easy"],["minor","较小的；次要的","easy"],["network","网络；联系网","easy"],["obvious","明显的；显然的","easy"],["paragraph","段落","easy"],["pattern","模式；图案","easy"],["percent","百分比","easy"],["period","时期；句号","easy"],["principle","原则；原理","easy"],["procedure","程序；步骤","medium"],["project","项目；计划","easy"],["reaction","反应；回应","easy"],["research","研究；调查","easy"],["respond","回应；回答","easy"],["role","角色；作用","easy"],["section","部分；章节","easy"],["series","系列；连续","easy"],["similar","相似的；类似的","easy"],["site","地点；网站","easy"],["task","任务；工作","easy"],["technique","技术；技巧","medium"],["technology","技术；科技","easy"],["theory","理论；学说","easy"],["transport","运输；交通","easy"],["validity","有效性；合理性","medium"],["volume","体积；卷册","easy"],["aberrant","异常的；偏离常规的","hard"],["abrasive","粗糙的；令人不快的","hard"],["abstain","戒除；弃权","hard"],["accredit","认可；授权","hard"],["affluence","富裕；富足","hard"],["allude","暗指；影射","hard"],["anomaly","异常；反常现象","hard"],["appease","安抚；平息","hard"],["arduous","艰巨的；费力的","hard"],["articulate","清楚表达；发音清晰的","hard"],["austerity","简朴；紧缩","hard"],["avert","避免；转移目光","hard"],["bewilder","使困惑；使迷惑","hard"],["bolster","支持；加强","hard"],["candid","坦率的；公正的","hard"],["cohesive","有凝聚力的；连贯的","hard"],["conjecture","推测；猜想","hard"],["connotation","内涵；隐含意义","hard"],["conspicuous","显眼的；明显的","hard"],["contingency","意外事件；偶然性","hard"],["converge","汇聚；趋同","hard"],["corroborate","证实；支持","hard"],["culminate","达到顶点；以...告终","hard"],["cumulative","累积的；渐增的","hard"],["curtail","削减；缩短","hard"],["deprivation","剥夺；匮乏","hard"],["deterrent","威慑因素；遏制物","hard"],["detrimental","有害的；不利的","hard"],["dichotomy","二分法；对立","hard"],["discrepancy","差异；不一致","hard"],["discretion","谨慎；自行决定权","hard"],["disseminate","传播；散布","hard"],["divergent","分歧的；发散的","hard"],["dogmatic","教条的；武断的","hard"],["elusive","难以捉摸的；难以理解的","hard"],["embody","体现；包含","hard"],["eminent","杰出的；显赫的","hard"],["encompass","包含；围绕","hard"],["enhancement","增强；改进","hard"],["epidemic","流行病；流行的","hard"],["equitable","公平的；公正的","hard"],["eradicate","根除；消灭","hard"],["exacerbate","加剧；使恶化","hard"],["excerpt","摘录；节选","hard"],["exempt","免除；被免除的","hard"],["expenditure","支出；花费","hard"],["finite","有限的；限定的","hard"],["foresee","预见；预知","hard"],["homogeneous","同质的；均匀的","hard"],["impartial","公正的；不偏不倚的","hard"],["imperative","必要的；紧急的","hard"],["impetus","推动力；刺激","hard"],["incidence","发生率；影响范围","hard"],["inertia","惯性；惰性","hard"],["inhibit","抑制；阻止","hard"],["intrinsic","内在的；固有的","hard"],["legitimacy","合法性；正当性","hard"],["lucrative","获利丰厚的","hard"],["mandatory","强制的；义务的","hard"],["marginalize","边缘化；忽视","hard"],["meticulous","一丝不苟的；细致的","hard"],["oblivious","未察觉的；健忘的","hard"],["paradigm","范式；典范","hard"],["peripheral","外围的；次要的","hard"],["perpetual","永久的；持续不断的","hard"],["plausible","看似合理的；可信的","hard"],["precedent","先例；惯例","hard"],["prevalence","流行；普遍存在","hard"],["profound","深刻的；意义深远的","hard"],["proliferate","迅速增加；扩散","hard"],["reconcile","调和；使一致","hard"],["redundant","多余的；冗余的","hard"],["resilience","恢复力；韧性","hard"],["rigorous","严格的；严谨的","hard"],["scrutiny","仔细审查；监督","hard"],["segregate","隔离；分开","hard"],["skepticism","怀疑态度","hard"],["solitary","独自的；孤独的","medium"],["stagnant","停滞的；不流动的","hard"],["subordinate","下级的；从属于","hard"],["substantiate","证实；使具体化","hard"],["succinct","简明的；简洁的","hard"],["supersede","取代；替代","hard"],["tangible","有形的；切实的","hard"],["tedious","冗长乏味的","hard"],["transient","短暂的；临时的","hard"],["ubiquitous","无处不在的","hard"],["unprecedented","前所未有的","hard"],["viable","可行的；能生存的","hard"],["vulnerable","易受伤害的；脆弱的","hard"]];
+  var WORDS = RAW_WORDS.map(function (r) {
+    return { word: r[0], meaning: r[1], difficulty: r[2] };
+  });
+
+  var DIFF_LABEL = { easy: "基础", medium: "进阶", hard: "困难" };
+  var LS_WRONG = "cet6w.wrongBook.v1";
+  var LS_STATS = "cet6w.stats.v1";
+  var LS_SET = "cet6w.settings.v1";
+  var AUTO_NEXT_DELAY = 900;
+
+  var SPEAK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  var CLOSE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  var DICT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></svg>';
+
+  function loadLS(key, fallback) {
+    try {
+      var v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : fallback;
+    } catch (e) { return fallback; }
+  }
+  function saveLS(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+  function dictUrl(word) {
+    return "https://dictionary.cambridge.org/dictionary/english/" + encodeURIComponent(word);
+  }
+
+  var elements = {
+    totalCount: document.getElementById("totalCount"),
+    correctCount: document.getElementById("correctCount"),
+    wrongCount: document.getElementById("wrongCount"),
+    accuracyRate: document.getElementById("accuracyRate"),
+    streakCount: document.getElementById("streakCount"),
+    wordIndex: document.getElementById("wordIndex"),
+    questionText: document.getElementById("questionText"),
+    questionCard: document.querySelector(".question-card"),
+    choiceArea: document.getElementById("choiceArea"),
+    feedback: document.getElementById("feedback"),
+    nextQuestion: document.getElementById("nextQuestion"),
+    resetPractice: document.getElementById("resetPractice"),
+    speakQuestion: document.getElementById("speakQuestion"),
+    wrongBookCount: document.getElementById("wrongBookCount"),
+    wrongBookList: document.getElementById("wrongBookList"),
+    practiceWrongBtn: document.getElementById("practiceWrongBtn"),
+    clearWrongBtn: document.getElementById("clearWrongBtn"),
+    exitWrongPractice: document.getElementById("exitWrongPractice"),
+    wrongPracticeBanner: document.getElementById("wrongPracticeBanner"),
+    vocabSearch: document.getElementById("vocabSearch"),
+    vocabCount: document.getElementById("vocabCount"),
+    vocabList: document.getElementById("vocabList"),
+    practiceView: document.getElementById("practiceView"),
+    vocabView: document.getElementById("vocabView"),
+    toast: document.getElementById("toast")
+  };
+
+  var savedStats = loadLS(LS_STATS, { total: 0, correct: 0, wrong: 0, streak: 0 });
+  var savedSet = loadLS(LS_SET, {});
+  var state = {
+    mode: savedSet.mode === "zh-to-en" ? "zh-to-en" : "en-to-zh",
+    difficulty: ["all", "easy", "medium", "hard"].indexOf(savedSet.difficulty) > -1 ? savedSet.difficulty : "all",
+    tab: "practice",
+    currentWord: null,
+    answered: false,
+    total: savedStats.total || 0,
+    correct: savedStats.correct || 0,
+    wrong: savedStats.wrong || 0,
+    streak: savedStats.streak || 0,
+    wrongBook: loadLS(LS_WRONG, []),
+    wrongPractice: false,
+    search: "",
+    autoNextTimer: null
+  };
+
+  function speak(text) {
+    if (!("speechSynthesis" in window) || !text) return;
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-US";
+      u.rate = 0.9;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    elements.toast.textContent = msg;
+    elements.toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { elements.toast.classList.remove("show"); }, 2000);
+  }
+
+  function getActiveWords() {
+    if (state.difficulty === "all") return WORDS;
+    return WORDS.filter(function (item) { return item.difficulty === state.difficulty; });
+  }
+
+  function shuffle(items) {
+    var result = items.slice();
+    for (var i = result.length - 1; i > 0; i -= 1) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = result[i]; result[i] = result[j]; result[j] = t;
+    }
+    return result;
+  }
+
+  function pickRandomFrom(pool) {
+    if (pool.length > 1 && state.currentWord) {
+      var candidates = pool.filter(function (w) { return w.word !== state.currentWord.word; });
+      return candidates[Math.floor(Math.random() * candidates.length)];
+    }
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function getChoiceOptions(targetWord) {
+    var pool = state.wrongPractice ? state.wrongBook : getActiveWords();
+    var source = pool.length >= 4 ? pool : WORDS;
+    var distractors = shuffle(source.filter(function (item) { return item.word !== targetWord.word; })).slice(0, 3);
+    return shuffle([targetWord].concat(distractors));
+  }
+
+  function getQuestionText(word) {
+    return state.mode === "zh-to-en" ? word.meaning : word.word;
+  }
+  function getOptionText(word) {
+    return state.mode === "zh-to-en" ? word.word : word.meaning;
+  }
+
+  function updateStats() {
+    elements.totalCount.textContent = state.total;
+    elements.correctCount.textContent = state.correct;
+    elements.wrongCount.textContent = state.wrong;
+    elements.streakCount.textContent = state.streak;
+    elements.accuracyRate.textContent = state.total > 0 ? Math.round((state.correct / state.total) * 100) + "%" : "—";
+  }
+  function saveStats() {
+    saveLS(LS_STATS, { total: state.total, correct: state.correct, wrong: state.wrong, streak: state.streak });
+  }
+  function saveSettings() {
+    saveLS(LS_SET, { mode: state.mode, difficulty: state.difficulty });
+  }
+
+  function updateControls() {
+    document.querySelectorAll("[data-mode]").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.mode === state.mode);
+    });
+    document.querySelectorAll("[data-difficulty]").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.difficulty === state.difficulty);
+    });
+    document.querySelectorAll(".tab-button").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.tab === state.tab);
+    });
+    elements.questionCard.classList.toggle("meaning-mode", state.mode === "zh-to-en");
+    elements.practiceView.classList.toggle("hidden", state.tab !== "practice");
+    elements.vocabView.classList.toggle("hidden", state.tab !== "vocab");
+    elements.wrongPracticeBanner.classList.toggle("hidden", !state.wrongPractice);
+    elements.practiceWrongBtn.classList.toggle("active", state.wrongPractice);
+  }
+
+  function renderFeedback(msg, type, word) {
+    elements.feedback.className = "feedback " + (type || "");
+    if (word) {
+      elements.feedback.innerHTML = '<span class="fb-msg"></span><button type="button" class="speak-btn" data-word="' + word + '" aria-label="播放发音" title="播放发音">' + SPEAK_SVG + '</button>';
+    } else {
+      elements.feedback.innerHTML = '<span class="fb-msg"></span>';
+    }
+    elements.feedback.querySelector(".fb-msg").textContent = msg;
+  }
+
+  function addWrongWord(word) {
+    var exists = state.wrongBook.some(function (item) { return item.word === word.word; });
+    if (!exists) state.wrongBook.push({ word: word.word, meaning: word.meaning, difficulty: word.difficulty });
+    renderWrongBook();
+  }
+  function removeWrongWord(word) {
+    state.wrongBook = state.wrongBook.filter(function (item) { return item.word !== word; });
+    renderWrongBook();
+  }
+
+  function renderWrongBook() {
+    elements.wrongBookCount.textContent = state.wrongBook.length + " 个";
+    if (state.wrongBook.length === 0) {
+      elements.wrongBookList.innerHTML = '<li class="empty-state">答错的词会自动记录在这里。</li>';
+      return;
+    }
+    elements.wrongBookList.innerHTML = state.wrongBook.map(function (item) {
+      return '<li>' +
+        '<button type="button" class="speak-btn small" data-word="' + item.word + '" aria-label="播放发音" title="播放发音">' + SPEAK_SVG + '</button>' +
+        '<strong>' + item.word + '</strong>' +
+        '<span class="wm">' + item.meaning + '</span>' +
+        '<span class="chip ' + item.difficulty + '">' + DIFF_LABEL[item.difficulty] + '</span>' +
+        '<a class="dict-link" href="' + dictUrl(item.word) + '" target="_blank" rel="noopener" aria-label="打开词典" title="查词典">' + DICT_SVG + '</a>' +
+        '<button type="button" class="remove-btn" data-remove="' + item.word + '" aria-label="移出错题本" title="移出">' + CLOSE_SVG + '</button>' +
+        '</li>';
+    }).join("");
+    saveLS(LS_WRONG, state.wrongBook);
+  }
+
+  function renderVocab() {
+    var q = state.search.trim().toLowerCase();
+    var list = WORDS.filter(function (w) {
+      if (state.difficulty !== "all" && w.difficulty !== state.difficulty) return false;
+      if (q && w.word.toLowerCase().indexOf(q) === -1 && w.meaning.toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    elements.vocabCount.textContent = list.length + " 词";
+    if (list.length === 0) {
+      elements.vocabList.innerHTML = '<li class="empty-state">未找到匹配的单词。</li>';
+      return;
+    }
+    elements.vocabList.innerHTML = list.map(function (w) {
+      return '<li>' +
+        '<button type="button" class="speak-btn small" data-word="' + w.word + '" aria-label="播放发音" title="播放发音">' + SPEAK_SVG + '</button>' +
+        '<span class="vw">' + w.word + '</span>' +
+        '<span class="vm">' + w.meaning + '</span>' +
+        '<span class="chip ' + w.difficulty + '">' + DIFF_LABEL[w.difficulty] + '</span>' +
+        '<a class="dict-link" href="' + dictUrl(w.word) + '" target="_blank" rel="noopener" aria-label="打开词典" title="查词典">' + DICT_SVG + '</a>' +
+        '</li>';
+    }).join("");
+  }
+
+  function clearAutoNextTimer() {
+    if (state.autoNextTimer) {
+      window.clearTimeout(state.autoNextTimer);
+      state.autoNextTimer = null;
+    }
+  }
+  function scheduleAutoNext() {
+    clearAutoNextTimer();
+    state.autoNextTimer = window.setTimeout(renderQuestion, AUTO_NEXT_DELAY);
+  }
+  function lockChoiceButtons() {
+    state.answered = true;
+    elements.choiceArea.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+  }
+
+  function judgeAnswer(option, selectedButton) {
+    if (state.answered) return;
+    var isCorrect = option.word === state.currentWord.word;
+    var word = state.currentWord;
+    state.total += 1;
+
+    if (isCorrect) {
+      state.correct += 1;
+      state.streak += 1;
+      if (state.wrongPractice) removeWrongWord(word.word);
+      renderFeedback("回答正确，即将进入下一题。", "correct", state.mode === "zh-to-en" ? word.word : null);
+    } else {
+      state.wrong += 1;
+      state.streak = 0;
+      if (!state.wrongPractice) addWrongWord(word);
+      renderFeedback("回答错误，正确答案：" + word.word + "（" + word.meaning + "）", "wrong", word.word);
+    }
+
+    selectedButton.classList.add(isCorrect ? "correct" : "wrong");
+    elements.choiceArea.querySelectorAll("button").forEach(function (b) {
+      if (b.dataset.word === word.word) b.classList.add("correct");
+    });
+
+    lockChoiceButtons();
+    updateStats();
+    saveStats();
+    if (isCorrect) scheduleAutoNext();
+  }
+
+  function renderQuestion() {
+    clearAutoNextTimer();
+    var activeWords = getActiveWords();
+    if (activeWords.length === 0) {
+      elements.questionText.textContent = "当前难度暂无词条";
+      elements.choiceArea.innerHTML = "";
+      renderFeedback("请切换到其他难度。", "wrong");
+      return;
+    }
+    if (state.wrongPractice) {
+      if (state.wrongBook.length === 0) {
+        state.wrongPractice = false;
+        updateControls();
+        toast("错题本已清空，全部掌握！");
+        renderQuestion();
+        return;
+      }
+      state.currentWord = pickRandomFrom(state.wrongBook);
+    } else {
+      state.currentWord = pickRandomFrom(activeWords);
+    }
+    state.answered = false;
+
+    elements.questionText.textContent = getQuestionText(state.currentWord);
+    elements.wordIndex.textContent = "第 " + (state.total + 1) + " 题";
+    elements.choiceArea.innerHTML = "";
+    renderFeedback("", "");
+    updateControls();
+    updateStats();
+
+    getChoiceOptions(state.currentWord).forEach(function (option, idx) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "choice-button";
+      button.dataset.word = option.word;
+      button.innerHTML = '<span class="opt-num">' + (idx + 1) + '</span>' + getOptionText(option);
+      button.addEventListener("click", function () { judgeAnswer(option, button); });
+      elements.choiceArea.appendChild(button);
+    });
+  }
+
+  function exitWrongPractice() {
+    if (!state.wrongPractice) return;
+    state.wrongPractice = false;
+    updateControls();
+    renderQuestion();
+  }
+
+  function startWrongPractice() {
+    if (state.wrongBook.length === 0) {
+      toast("错题本是空的，先去练习吧");
+      return;
+    }
+    state.wrongPractice = true;
+    state.answered = false;
+    updateControls();
+    renderQuestion();
+  }
+
+  function resetPractice() {
+    var hasData = state.total > 0 || state.wrongBook.length > 0;
+    if (hasData && !window.confirm("重新开始会清空本轮统计和错题本，确定吗？")) return;
+    state.currentWord = null;
+    state.answered = false;
+    state.total = 0;
+    state.correct = 0;
+    state.wrong = 0;
+    state.streak = 0;
+    state.wrongBook = [];
+    state.wrongPractice = false;
+    saveStats();
+    saveLS(LS_WRONG, []);
+    renderWrongBook();
+    updateControls();
+    renderQuestion();
+  }
+
+  function setMode(mode) {
+    if (state.mode === mode) return;
+    state.mode = mode;
+    state.wrongPractice = false;
+    saveSettings();
+    renderQuestion();
+    updateControls();
+  }
+  function setDifficulty(difficulty) {
+    if (state.difficulty === difficulty) return;
+    state.difficulty = difficulty;
+    state.wrongPractice = false;
+    saveSettings();
+    renderQuestion();
+    updateControls();
+    if (state.tab === "vocab") renderVocab();
+  }
+  function setTab(tab) {
+    state.tab = tab;
+    updateControls();
+    if (tab === "vocab") renderVocab();
+  }
+
+  document.querySelectorAll("[data-mode]").forEach(function (b) {
+    b.addEventListener("click", function () { setMode(b.dataset.mode); });
+  });
+  document.querySelectorAll("[data-difficulty]").forEach(function (b) {
+    b.addEventListener("click", function () { setDifficulty(b.dataset.difficulty); });
+  });
+  document.querySelectorAll(".tab-button").forEach(function (b) {
+    b.addEventListener("click", function () { setTab(b.dataset.tab); });
+  });
+  elements.nextQuestion.addEventListener("click", renderQuestion);
+  elements.resetPractice.addEventListener("click", resetPractice);
+  elements.speakQuestion.addEventListener("click", function () {
+    if (state.currentWord) speak(state.currentWord.word);
+  });
+  elements.practiceWrongBtn.addEventListener("click", startWrongPractice);
+  elements.clearWrongBtn.addEventListener("click", function () {
+    if (state.wrongBook.length === 0) {
+      toast("错题本是空的");
+      return;
+    }
+    if (!window.confirm("确定清空错题本吗？")) return;
+    state.wrongBook = [];
+    state.wrongPractice = false;
+    saveLS(LS_WRONG, []);
+    renderWrongBook();
+    updateControls();
+    renderQuestion();
+  });
+  elements.exitWrongPractice.addEventListener("click", exitWrongPractice);
+  elements.vocabSearch.addEventListener("input", function () {
+    state.search = elements.vocabSearch.value;
+    renderVocab();
+  });
+
+  document.addEventListener("click", function (e) {
+    var speakBtn = e.target.closest ? e.target.closest(".speak-btn") : null;
+    if (speakBtn && speakBtn.dataset.word) {
+      speak(speakBtn.dataset.word);
+      return;
+    }
+    var removeBtn = e.target.closest ? e.target.closest("[data-remove]") : null;
+    if (removeBtn) {
+      var w = removeBtn.dataset.remove;
+      removeWrongWord(w);
+      if (state.wrongPractice && state.wrongBook.length === 0) {
+        state.wrongPractice = false;
+        updateControls();
+        renderQuestion();
+      }
+      toast("已从错题本移出：" + w);
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    var tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (state.tab !== "practice") return;
+    if (e.key >= "1" && e.key <= "4") {
+      var btns = elements.choiceArea.querySelectorAll("button:not([disabled])");
+      var idx = parseInt(e.key, 10) - 1;
+      if (btns[idx]) btns[idx].click();
+    } else if (e.key === "Enter") {
+      if (state.answered) elements.nextQuestion.click();
+    } else if (e.key === "r" || e.key === "R") {
+      elements.resetPractice.click();
+    }
+  });
+
+  updateControls();
+  updateStats();
+  renderWrongBook();
+  renderVocab();
+  renderQuestion();
+})();
+</script>
+</body>
+</html>
